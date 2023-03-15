@@ -3,6 +3,17 @@ package jsonlogger
 import (
 	"encoding/json"
 	"log"
+	"os"
+)
+
+var (
+	logLevels = map[string]int{
+		"INFO":  0,
+		"DEBUG": 1,
+		"WARN":  2,
+		"ERROR": 3,
+	}
+	logLevel = logLevels[os.Getenv("LOG_LEVEL")]
 )
 
 type JsonLog struct {
@@ -21,6 +32,11 @@ func (jLog JsonLog) Log() {
 	}
 	if jLog.Severity == "" {
 		jLog.Severity = "INFO"
+	}
+	if level, ok := logLevels[jLog.Severity]; ok {
+		if level < logLevel {
+			return
+		}
 	}
 	encodedLog, err := json.Marshal(jLog)
 	if err != nil {
